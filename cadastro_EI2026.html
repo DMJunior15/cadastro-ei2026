@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro — Engenharia Informática 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg:#0d1117; --surface:#161b22; --card:#1c2128; --border:#30363d; --accent:#e94560; --blue:#0f3460; --green:#2ea043; --text:#e6edf3; --muted:#8b949e; --radius:14px; }
+    body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    .site-header { background:linear-gradient(135deg,#0f3460 0%,#16213e 55%,#0d1117 100%); padding:2rem 1.5rem 1.6rem; text-align:center; border-bottom:3px solid var(--accent); position:relative; overflow:hidden; }
+    .site-header::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,.018) 40px,rgba(255,255,255,.018) 80px); }
+    .site-header .logo { font-size:2.8rem; margin-bottom:.4rem; }
+    .site-header h1 { font-size:1.55rem; font-weight:700; color:#fff; position:relative; }
+    .site-header p { color:var(--muted); margin-top:.35rem; font-size:.9rem; position:relative; }
+    .wrap { max-width:700px; margin:0 auto; padding:2rem 1rem 5rem; }
+    .tab-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 8px 32px rgba(0,0,0,.45); overflow:hidden; }
+    .tab-nav { display:flex; background:var(--surface); border-bottom:1px solid var(--border); }
+    .tab-btn { flex:1; padding:.9rem .5rem; background:none; border:none; border-bottom:3px solid transparent; color:var(--muted); font-size:.82rem; font-weight:600; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; align-items:center; gap:.25rem; }
+    .tab-btn .tab-num { width:26px; height:26px; border-radius:50%; background:var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:700; transition:all .2s; flex-shrink:0; }
+    .tab-btn .tab-lbl { font-size:.73rem; }
+    .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .tab-btn.active .tab-num { background:var(--accent); color:#fff; box-shadow:0 0 10px rgba(233,69,96,.4); }
+    .tab-btn.done { color:var(--green); }
+    .tab-btn.done .tab-num { background:var(--green); color:#fff; }
+    .tab-btn:disabled { opacity:.35; cursor:not-allowed; }
+    .tab-divider { width:1px; background:var(--border); flex-shrink:0; }
+    .tab-panel { padding:2rem; display:none; }
+    .tab-panel.active { display:block; }
+    .panel-title { font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:1.5rem; display:flex; align-items:center; gap:.5rem; }
+    .form-row { margin-bottom:1.15rem; }
+    .field-label { display:block; font-size:.83rem; color:var(--muted); margin-bottom:.38rem; font-weight:500; }
+    .field-label .req { color:var(--accent); margin-left:2px; }
+    .field-label .opt { color:#444; font-size:.74rem; margin-left:4px; }
+    input[type=text],input[type=tel],input[type=email],input[type=password] { width:100%; padding:.72rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.93rem; transition:border-color .2s,box-shadow .2s; }
+    input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(233,69,96,.14); }
+    input::placeholder { color:#3d444d; }
+    .err-msg { font-size:.77rem; color:var(--accent); margin-top:.28rem; display:none; }
+    .err-msg.show { display:block; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:520px){ .two-col{grid-template-columns:1fr;} }
+    .alert { padding:.8rem 1rem; border-radius:8px; font-size:.85rem; margin-top:.8rem; display:none; }
+    .alert.show { display:flex; align-items:center; gap:.5rem; }
+    .alert-danger { background:rgba(233,69,96,.1); border:1px solid var(--accent); color:#f87171; }
+    .alert-info { background:rgba(15,52,96,.3); border:1px solid #1e4a80; color:#7cb8f0; }
+    .subject-list { display:flex; flex-direction:column; gap:.55rem; }
+    .subject-row { display:flex; align-items:center; gap:.8rem; padding:.72rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; cursor:pointer; user-select:none; transition:border-color .2s,background .2s; }
+    .subject-row:hover { border-color:#4a5568; background:#1e2433; }
+    .subject-row.checked { border-color:var(--accent); background:rgba(233,69,96,.08); }
+    .subject-row input[type=checkbox] { width:17px; height:17px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+    .subject-name { flex:1; font-size:.86rem; line-height:1.3; }
+    .subject-code { background:var(--accent); color:#fff; padding:.18rem .5rem; border-radius:20px; font-size:.7rem; font-weight:700; flex-shrink:0; }
+    .sel-all-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:.7rem; }
+    .sel-all-row p { font-size:.83rem; color:var(--muted); }
+    .link-btn { background:none; border:none; color:var(--accent); font-size:.8rem; cursor:pointer; }
+    .link-btn:hover { text-decoration:underline; }
+    .year-grid { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; margin-top:.5rem; }
+    .year-card { padding:1.3rem 1rem; background:var(--surface); border:2px solid var(--border); border-radius:10px; color:var(--text); font-size:1.1rem; font-weight:700; cursor:pointer; text-align:center; transition:all .2s; }
+    .year-card:hover { border-color:#4a5568; background:#1e2433; }
+    .year-card.picked { border-color:var(--accent); background:rgba(233,69,96,.12); color:#fff; }
+    .btn-row { display:flex; gap:.8rem; justify-content:space-between; align-items:center; margin-top:1.8rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+    .btn-row-right { justify-content:flex-end; }
+    .btn { padding:.72rem 1.6rem; border:none; border-radius:8px; font-size:.9rem; font-weight:600; cursor:pointer; transition:all .2s; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:#c73652; transform:translateY(-1px); box-shadow:0 4px 14px rgba(233,69,96,.35); }
+    .btn-ghost { background:var(--surface); color:var(--muted); border:1px solid var(--border); }
+    .btn-ghost:hover { background:#1e2433; color:var(--text); }
+    .btn-green { background:var(--green); color:#fff; }
+    .btn-green:hover { background:#218838; transform:translateY(-1px); }
+    .btn-sm { padding:.38rem .75rem; font-size:.78rem; border-radius:6px; }
+    .btn-danger-sm { background:#6e1a1a; color:#f87171; }
+    .btn-danger-sm:hover { background:#991b1b; }
+    .btn:disabled { opacity:.5; cursor:not-allowed; transform:none !important; }
+    .spinner { display:inline-block; width:15px; height:15px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; margin-right:.4rem; vertical-align:middle; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .success-wrap { text-align:center; padding:1rem 1rem 1.5rem; }
+    .success-icon { font-size:4.5rem; }
+    .success-wrap h2 { font-size:1.6rem; color:#4ade80; margin:.8rem 0 .5rem; }
+    .success-wrap p { color:var(--muted); font-size:.9rem; }
+    .motto { margin:1.8rem 0 1.5rem; padding:1.1rem 1.4rem; border-left:4px solid var(--accent); background:rgba(233,69,96,.07); border-radius:0 10px 10px 0; text-align:left; font-size:1.05rem; font-style:italic; color:var(--accent); font-weight:600; line-height:1.5; }
+    .hidden { display:none !important; }
+    .admin-bar { background:#0a0d12; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); flex-wrap:wrap; gap:.8rem; }
+    .admin-bar h2 { font-size:1.1rem; color:#fff; }
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
+    @media(max-width:480px){ .stats-row{grid-template-columns:1fr 1fr;} }
+    .stat-box { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.1rem; text-align:center; }
+    .stat-num { font-size:2rem; font-weight:800; color:var(--accent); }
+    .stat-label { font-size:.76rem; color:var(--muted); margin-top:.2rem; }
+    .tbl-wrap { overflow-x:auto; border-radius:10px; }
+    table { width:100%; border-collapse:collapse; min-width:750px; }
+    thead th { background:var(--surface); padding:.7rem 1rem; text-align:left; font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid var(--border); }
+    tbody td { padding:.75rem 1rem; font-size:.83rem; border-bottom:1px solid #1e262f; vertical-align:top; }
+    tbody tr:hover { background:rgba(255,255,255,.02); }
+    tbody tr:last-child td { border-bottom:none; }
+    .badge { display:inline-block; padding:.14rem .42rem; background:rgba(233,69,96,.18); color:#f87171; border-radius:20px; font-size:.68rem; font-weight:700; margin:.1rem; }
+    .empty-state { text-align:center; padding:3rem; color:var(--muted); }
+    .search-row { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+    .search-row input { flex:1; min-width:180px; }
+    .status-dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:.4rem; }
+    .dot-green { background:#2ea043; }
+    #adminTrigger { position:fixed; bottom:1rem; right:1rem; background:rgba(255,255,255,.04); color:#3d444d; border:1px solid #21262d; border-radius:8px; padding:.4rem .75rem; font-size:.72rem; cursor:pointer; transition:all .2s; z-index:99; }
+    #adminTrigger:hover { background:rgba(255,255,255,.09); color:var(--muted); }
+  </style>
+</head>
+<body>
+
+<div id="secRegister">
+  <header class="site-header">
+    <div class="logo">🎓</div>
+    <h1>Engenharia Informática 2026</h1>
+    <p>Formulário de Cadastro dos Estudantes</p>
+  </header>
+  <div class="wrap">
+    <div class="tab-card">
+      <div class="tab-nav" id="tabNav">
+        <button class="tab-btn active" id="tabBtn1" onclick="tryGoTab(1)">
+          <div class="tab-num" id="tn1">1</div>
+          <span class="tab-lbl">Dados Pessoais</span>
+        </button>
+        <div class="tab-divider"></div>
+        <button class="tab-btn" id="tabBtn2" onclick="tryGoTab(2)" disabled>
+          <div class="tab-num" id="tn2">2</div>
+          <span class="tab-lbl">Cadeiras</span>
+        </button>
+        <div class="tab-divider"></div>
+        <button class="tab-btn" id="tabBtn3" onclick="tryGoTab(3)" disabled>
+          <div class="tab-num" id="tn3">3</div>
+          <span class="tab-lbl">Ano</span>
+        </button>
+      </div>
+
+      <div class="tab-panel active" id="panel1">
+        <div class="panel-title">📋 Informações Pessoais</div>
+        <div class="form-row">
+          <label class="field-label">Nome Completo <span class="req">*</span></label>
+          <input type="text" id="fNome" placeholder="Digite o seu nome completo" autocomplete="name">
+          <div class="err-msg" id="errNome">Insira o nome completo (mínimo 3 caracteres).</div>
+        </div>
+        <div class="two-col">
+          <div class="form-row">
+            <label class="field-label">Telefone Principal <span class="req">*</span></label>
+            <input type="tel" id="fTel1" placeholder="+244 9XX XXX XXX">
+            <div class="err-msg" id="errTel1">Insira um número de telefone válido.</div>
+          </div>
+          <div class="form-row">
+            <label class="field-label">Número Alternativo <span class="opt">(Opcional)</span></label>
+            <input type="tel" id="fTel2" placeholder="+244 9XX XXX XXX">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="field-label">Bairro <span class="opt">(Opcional)</span></label>
+          <input type="text" id="fBairro" placeholder="Ex: Alvalade, Talatona, Miramar…">
+        </div>
+        <div class="form-row">
+          <label class="field-label">Email Address <span class="req">*</span></label>
+          <input type="email" id="fEmail" placeholder="seuemail@exemplo.com" autocomplete="email">
+          <div class="err-msg" id="errEmail">Insira um endereço de email válido.</div>
+        </div>
+        <div class="alert alert-danger" id="alertDup">⚠️ Já existe um cadastro com este nome e número de telefone!</div>
+        <div class="alert alert-info" id="alertChecking"><span class="spinner"></span> A verificar…</div>
+        <div class="btn-row btn-row-right">
+          <button class="btn btn-primary" id="btnNext1" onclick="goTab1to2()">Próximo →</button>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel2">
+        <div class="panel-title">📚 Cadeiras que Frequenta</div>
+        <div class="sel-all-row">
+          <p>Selecione as cadeiras em que está matriculado:</p>
+          <button class="link-btn" onclick="toggleAll()">Marcar todas</button>
+        </div>
+        <div class="subject-list" id="subjectsList"></div>
+        <div class="err-msg" id="errSubs" style="margin-top:.6rem">Selecione pelo menos uma cadeira.</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="goTab(1)">← Anterior</button>
+          <button class="btn btn-primary" onclick="goTab2to3()">Próximo →</button>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel3">
+        <div class="panel-title">🏫 Ano da Faculdade</div>
+        <p style="color:var(--muted);font-size:.86rem;margin-bottom:1.2rem">Como não está a frequentar todas as cadeiras, em que ano curricular se encontra?</p>
+        <div class="year-grid">
+          <button class="year-card" onclick="pickYear(this,2)">2º Ano</button>
+          <button class="year-card" onclick="pickYear(this,3)">3º Ano</button>
+          <button class="year-card" onclick="pickYear(this,4)">4º Ano</button>
+          <button class="year-card" onclick="pickYear(this,5)">5º Ano</button>
+        </div>
+        <div class="err-msg" id="errYear" style="margin-top:.8rem">Por favor, selecione o seu ano.</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="goTab(2)">← Anterior</button>
+          <button class="btn btn-primary" id="btnFinalizar" onclick="submitForm()">Finalizar ✓</button>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panelSuccess">
+        <div class="success-wrap">
+          <div class="success-icon">✅</div>
+          <h2>Cadastro Realizado!</h2>
+          <p>O seu registo foi guardado com sucesso na turma de Engenharia Informática 2026.</p>
+          <div class="motto">"Vamos terminar essa Engenharia por Bem ou por Mal"</div>
+          <p style="color:var(--muted)">Boa sorte no semestre! 💪</p>
+          <div style="margin-top:1.8rem">
+            <button class="btn btn-green" onclick="resetForm()">+ Novo Cadastro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="secAdminLogin" class="hidden">
+  <header class="site-header">
+    <div class="logo">🔐</div>
+    <h1>Área Administrativa</h1>
+    <p>Engenharia Informática 2026</p>
+  </header>
+  <div class="wrap" style="max-width:440px;padding-top:2rem">
+    <div class="tab-card">
+      <div class="tab-panel active">
+        <div class="panel-title">🔑 Acesso Restrito</div>
+        <p style="color:var(--muted);font-size:.86rem;margin-bottom:1.3rem">Apenas o professor tem acesso a esta área.</p>
+        <div class="form-row">
+          <label class="field-label">Senha de Administrador <span class="req">*</span></label>
+          <input type="password" id="fAdminPwd" placeholder="Digite a senha" onkeydown="if(event.key==='Enter') doLogin()">
+          <div class="err-msg" id="errLogin">Senha incorrecta. Tente novamente.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="showRegister()">← Voltar</button>
+          <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="secAdmin" class="hidden">
+  <div class="admin-bar">
+    <h2>📊 Painel do Professor — EI 2026</h2>
+    <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-primary btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="refreshAdmin()">↺ Atualizar</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="wrap" style="max-width:1150px;padding-top:1.5rem">
+    <div id="connectionStatus" class="hidden" style="margin-bottom:1.2rem;font-size:.83rem;color:var(--muted)"></div>
+    <div class="stats-row" id="adminStats"></div>
+    <div class="tab-card" style="padding:1.5rem">
+      <div class="panel-title">📋 Lista de Estudantes</div>
+      <div class="search-row">
+        <input type="text" id="searchBox" placeholder="🔍  Pesquisar por nome, telefone, bairro ou email…" oninput="renderTable()">
+        <button class="btn btn-ghost btn-sm" onclick="confirmClear()" style="color:#f87171;white-space:nowrap">🗑 Limpar Tudo</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Nome</th><th>Tel. Principal</th><th>Tel. Alt.</th><th>Bairro</th><th>Email</th><th>Cadeiras</th><th>Ano</th><th>Data</th><th></th></tr>
+          </thead>
+          <tbody id="studentsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state hidden" id="emptyState">
+        <div style="font-size:2.5rem">📭</div>
+        <p style="margin-top:.5rem">Nenhum estudante cadastrado ainda.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="adminTrigger" onclick="showAdminLogin()" title="Administração">⚙</button>
+
+<script>
+const ADMIN_PASS  = 'EI2026admin';
+const LOCAL_KEY   = 'ei2026_local_v3';
+const URL_KEY     = 'ei2026_sheetdb_url';
+const DEFAULT_URL = 'https://sheetdb.io/api/v1/yt4jukgmge98t';
+let chosenYear=null, isLoggedIn=false, tabDone=[false,false,false];
+
+const SUBJECTS=[
+  {name:'Álgebra Linear e Geometria Analítica',code:'ALGA'},
+  {name:'Análise Matemática 1',code:'AM1'},
+  {name:'Física 1',code:'F1'},
+  {name:'Inglês Técnico',code:'IT'},
+  {name:'Introdução à Informática',code:'II'},
+  {name:'Metodologia de Estudo e Investigação Científica',code:'MEIC'},
+];
+
+function getUrl(){ try{ return localStorage.getItem(URL_KEY)||DEFAULT_URL; }catch(e){ return DEFAULT_URL; } }
+function localGet(){ try{ return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]'); }catch(e){ return []; } }
+function localSet(d){ try{ localStorage.setItem(LOCAL_KEY,JSON.stringify(d)); }catch(e){} }
+
+function rowToStudent(r){
+  return { id:r['ID']||'', nome:r['Nome']||'', tel1:r['Tel. Principal']||'', tel2:r['Tel. Alternativo']||'', bairro:r['Bairro']||'', email:r['Email']||'', cadeiras:String(r['Cadeiras']||'').split(',').map(s=>s.trim()).filter(Boolean).map(c=>({code:c})), ano:r['Ano']||'', data:r['Data de Registo']||'' };
+}
+function studentToRow(s){
+  return { 'ID':String(s.id), 'Nome':s.nome, 'Tel. Principal':s.tel1, 'Tel. Alternativo':s.tel2||'', 'Bairro':s.bairro||'', 'Email':s.email, 'Cadeiras':(s.cadeiras||[]).map(c=>c.code).join(', '), 'Ano':s.ano||'', 'Data de Registo':s.data||'' };
+}
+
+async function apiAdd(student){
+  const url=getUrl(); if(!url) return false;
+  try{ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[studentToRow(student)]})}); const j=await r.json(); return j.created>0; }catch(e){ return false; }
+}
+async function apiFetch(){
+  const url=getUrl(); if(!url) return null;
+  try{ const r=await fetch(url); const j=await r.json(); if(Array.isArray(j)) return j.map(rowToStudent); return null; }catch(e){ return null; }
+}
+async function apiCheckDuplicate(nome,tel1){
+  const url=getUrl(); if(!url) return false;
+  try{ const r=await fetch(`${url}/search?Nome=${encodeURIComponent(nome)}&Tel. Principal=${encodeURIComponent(tel1)}`); const j=await r.json(); return Array.isArray(j)&&j.length>0; }catch(e){ return false; }
+}
+async function apiDelete(id){
+  const url=getUrl(); if(!url) return false;
+  try{ const r=await fetch(`${url}/ID/${encodeURIComponent(id)}`,{method:'DELETE'}); const j=await r.json(); return j.deleted>0; }catch(e){ return false; }
+}
+
+(function init(){
+  const ul=document.getElementById('subjectsList');
+  ul.innerHTML=SUBJECTS.map((s,i)=>`<label class="subject-row" id="sr${i}" for="cb${i}"><input type="checkbox" id="cb${i}" onchange="styleRow(${i})"><span class="subject-name">${s.name}</span><span class="subject-code">${s.code}</span></label>`).join('');
+})();
+
+function styleRow(i){ document.getElementById('sr'+i).classList.toggle('checked',document.getElementById('cb'+i).checked); }
+function toggleAll(){ const any=SUBJECTS.some((_,i)=>!document.getElementById('cb'+i).checked); SUBJECTS.forEach((_,i)=>{ document.getElementById('cb'+i).checked=any; styleRow(i); }); }
+function selSubs(){ return SUBJECTS.filter((_,i)=>document.getElementById('cb'+i).checked); }
+
+function goTab(n){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel'+n).classList.add('active');
+  [1,2,3].forEach(i=>{ const btn=document.getElementById('tabBtn'+i),num=document.getElementById('tn'+i); btn.classList.remove('active','done'); if(i===n){btn.classList.add('active');num.textContent=i;}else if(tabDone[i-1]){btn.classList.add('done');num.textContent='✓';btn.disabled=false;}else{num.textContent=i;} });
+}
+function tryGoTab(n){ if(tabDone[n-1]||n<curTab()) goTab(n); }
+function curTab(){ for(let i=1;i<=3;i++) if(document.getElementById('panel'+i).classList.contains('active')) return i; return 1; }
+
+async function goTab1to2(){
+  hideEl('alertDup'); hideEl('alertChecking');
+  if(!validateP1()) return;
+  const nome=val('fNome'),tel1=val('fTel1');
+  document.getElementById('btnNext1').disabled=true; showEl('alertChecking');
+  let dup=false;
+  const url=getUrl();
+  if(url){ dup=await apiCheckDuplicate(nome,tel1); }
+  else{ dup=localGet().some(s=>s.nome.toLowerCase()===nome.toLowerCase()&&s.tel1===tel1); }
+  hideEl('alertChecking'); document.getElementById('btnNext1').disabled=false;
+  if(dup){ showEl('alertDup'); return; }
+  tabDone[0]=true; document.getElementById('tabBtn2').disabled=false; goTab(2);
+}
+
+function goTab2to3(){
+  hideEl('errSubs'); const sel=selSubs();
+  if(!sel.length){ showEl('errSubs'); return; }
+  tabDone[1]=true;
+  if(sel.length===SUBJECTS.length){ chosenYear='1º Ano (Completo)'; tabDone[2]=true; finalSubmit(); }
+  else{ document.getElementById('tabBtn3').disabled=false; goTab(3); }
+}
+
+function pickYear(btn,yr){ document.querySelectorAll('.year-card').forEach(b=>b.classList.remove('picked')); btn.classList.add('picked'); chosenYear=yr+'º Ano'; hideEl('errYear'); }
+
+function val(id){ return document.getElementById(id).value.trim(); }
+function showEl(id){ const e=document.getElementById(id); e.classList.add('show'); e.classList.remove('hidden'); }
+function hideEl(id){ const e=document.getElementById(id); e.classList.remove('show'); e.classList.add('hidden'); }
+function setErr(eid,ok){ document.getElementById(eid).classList.toggle('show',!ok); return ok; }
+
+function validateP1(){
+  let ok=true;
+  ok=setErr('errNome',val('fNome').length>=3)&&ok;
+  ok=setErr('errTel1',val('fTel1').length>=7)&&ok;
+  ok=setErr('errEmail',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('fEmail')))&&ok;
+  return ok;
+}
+
+function submitForm(){ if(!chosenYear){ showEl('errYear'); return; } tabDone[2]=true; finalSubmit(); }
+
+async function finalSubmit(){
+  const btn=document.getElementById('btnFinalizar'); if(btn) btn.disabled=true;
+  const student={ id:Date.now(), nome:val('fNome'), tel1:val('fTel1'), tel2:val('fTel2'), bairro:val('fBairro'), email:val('fEmail'), cadeiras:selSubs(), ano:chosenYear, data:new Date().toLocaleString('pt-PT') };
+  const list=localGet(); list.push(student); localSet(list);
+  if(getUrl()) await apiAdd(student);
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panelSuccess').classList.add('active');
+  document.getElementById('tabNav').classList.add('hidden');
+  if(btn) btn.disabled=false;
+}
+
+function resetForm(){
+  ['fNome','fTel1','fTel2','fBairro','fEmail'].forEach(id=>document.getElementById(id).value='');
+  chosenYear=null; tabDone=[false,false,false];
+  SUBJECTS.forEach((_,i)=>{ document.getElementById('cb'+i).checked=false; styleRow(i); });
+  document.querySelectorAll('.year-card').forEach(b=>b.classList.remove('picked'));
+  ['alertDup','alertChecking','errNome','errTel1','errEmail','errSubs','errYear'].forEach(hideEl);
+  document.getElementById('tabNav').classList.remove('hidden');
+  [1,2,3].forEach(i=>{ const btn=document.getElementById('tabBtn'+i); btn.classList.remove('active','done'); document.getElementById('tn'+i).textContent=i; btn.disabled=(i!==1); });
+  document.getElementById('tabBtn1').classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel1').classList.add('active');
+}
+
+function showRegister(){ document.getElementById('secRegister').classList.remove('hidden'); document.getElementById('secAdminLogin').classList.add('hidden'); document.getElementById('secAdmin').classList.add('hidden'); }
+function showAdminLogin(){ if(isLoggedIn){ showAdminPanel(); return; } document.getElementById('secRegister').classList.add('hidden'); document.getElementById('secAdminLogin').classList.remove('hidden'); document.getElementById('secAdmin').classList.add('hidden'); }
+function showAdminPanel(){ document.getElementById('secRegister').classList.add('hidden'); document.getElementById('secAdminLogin').classList.add('hidden'); document.getElementById('secAdmin').classList.remove('hidden'); renderAdmin(); }
+
+function doLogin(){ if(document.getElementById('fAdminPwd').value===ADMIN_PASS){ isLoggedIn=true; document.getElementById('fAdminPwd').value=''; document.getElementById('errLogin').classList.remove('show'); showAdminPanel(); }else{ document.getElementById('errLogin').classList.add('show'); } }
+function doLogout(){ isLoggedIn=false; showRegister(); }
+
+async function renderAdmin(){
+  const url=getUrl(), status=document.getElementById('connectionStatus');
+  document.getElementById('setupGuide') && document.getElementById('setupGuide').classList.add('hidden');
+  if(url){ status.classList.remove('hidden'); status.innerHTML='<span class="status-dot" style="background:#e6a817"></span>A carregar dados…';
+    const online=await apiFetch();
+    if(online){ localSet(online); status.innerHTML=`<span class="status-dot dot-green"></span>Ligado ao Google Sheets ✓ — ${online.length} estudante(s)`; }
+    else{ status.innerHTML='<span class="status-dot" style="background:#e6a817"></span>A usar dados locais'; }
+  }
+  renderStats(); renderTable();
+}
+async function refreshAdmin(){ await renderAdmin(); }
+
+function renderStats(){
+  const all=localGet(), full=all.filter(s=>s.cadeiras.length===SUBJECTS.length).length;
+  document.getElementById('adminStats').innerHTML=`<div class="stat-box"><div class="stat-num">${all.length}</div><div class="stat-label">Total Cadastrados</div></div><div class="stat-box"><div class="stat-num">${full}</div><div class="stat-label">Todas as Cadeiras</div></div><div class="stat-box"><div class="stat-num">${all.length-full}</div><div class="stat-label">Cadeiras Parciais</div></div>`;
+}
+
+function renderTable(){
+  const q=(document.getElementById('searchBox').value||'').toLowerCase();
+  const rows=localGet().filter(s=>!q||s.nome.toLowerCase().includes(q)||s.tel1.includes(q)||(s.bairro||'').toLowerCase().includes(q)||s.email.toLowerCase().includes(q));
+  const tbody=document.getElementById('studentsBody'), empty=document.getElementById('emptyState');
+  if(!rows.length){ tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  tbody.innerHTML=rows.map((s,i)=>`<tr><td style="color:var(--muted)">${i+1}</td><td><strong>${esc(s.nome)}</strong></td><td>${esc(s.tel1)}</td><td>${s.tel2?esc(s.tel2):'<span style="color:#3d444d">—</span>'}</td><td>${s.bairro?esc(s.bairro):'<span style="color:#3d444d">—</span>'}</td><td style="font-size:.78rem">${esc(s.email)}</td><td>${(s.cadeiras||[]).map(c=>`<span class="badge">${esc(c.code)}</span>`).join('')}</td><td style="white-space:nowrap">${esc(s.ano||'')}</td><td style="color:var(--muted);font-size:.76rem;white-space:nowrap">${esc(s.data||'')}</td><td><button class="btn btn-danger-sm btn-sm" onclick="deleteStudent('${s.id}')">✕</button></td></tr>`).join('');
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function deleteStudent(id){ if(!confirm('Remover este estudante?')) return; localSet(localGet().filter(s=>String(s.id)!==String(id))); if(getUrl()) await apiDelete(id); renderAdmin(); }
+function confirmClear(){ if(!confirm('Apagar TODOS os cadastros?\nEsta acção não pode ser desfeita!')) return; localSet([]); renderStats(); renderTable(); }
+
+function exportCSV(){
+  const list=localGet(); if(!list.length){ alert('Sem dados para exportar.'); return; }
+  const cols=['#','Nome','Tel. Principal','Tel. Alternativo','Bairro','Email','Cadeiras','Ano','Data'];
+  const rows=list.map((s,i)=>[i+1,s.nome,s.tel1,s.tel2||'',s.bairro||'',s.email,(s.cadeiras||[]).map(c=>c.code).join('; '),s.ano||'',s.data||'']);
+  const csv=[cols,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'EI2026_Estudantes.csv'}).click();
+}
+</script>
+</body>
+</html>
